@@ -1,0 +1,20 @@
+#!/bin/bash
+
+BEAR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export PATH=`echo $PATH | sed -e "s?${BEAR_DIR}[^:]*:??g"`
+
+INSIDE_BEAR=false
+PARENT_TREE=`pstree -a -s $$`
+echo ${PARENT_TREE} | grep "python.*bear.*bear" >/dev/null && INSIDE_BEAR=true
+
+COMP_DB_OPT=""
+if [ x"${BEAR_DB_FILE}" = x"" ]; then
+  echo "Cannot find compilation db file in \$BEAR_DB_FILE" 1>&2
+  exit 1
+fi
+
+if [ ${INSIDE_BEAR} = true ]; then
+  make $@
+else
+  ${BEAR_DIR}/bear -a -o ${BEAR_DB_FIKE} make $@
+fi

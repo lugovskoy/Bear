@@ -47,6 +47,9 @@ import tempfile
 import shutil
 import contextlib
 import logging
+import fcntl
+import errno
+import time
 
 
 def main():
@@ -81,7 +84,26 @@ def capture(args):
         finally:
             shutil.rmtree(name)
 
-    def post_processing(commands):
+    def lock_file(fname):
+      fd = open(fname, 'r+')
+      while True:
+          try:
+              fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+              break
+          except IOError as e:
+              # raise on unrelated IOErrors
+              if e.errno != errno.EAGAIN:
+                  raise
+              else:
+                  time.sleep(0.1)
+      return fd
+
+    def unlock_file(fd):
+        fd.flush()
+        fcntl.flock(fd, fcntl.LOCK_UN)
+        fd.close()
+
+    def post_processing(commands, fd):
         # run post processing only if that was requested
         if not args.raw_entries:
             # create entries from the current run
@@ -91,8 +113,10 @@ def capture(args):
                 (format_entry(x) for x in commands if compiler_call(x)))
             # read entries from previous run
             if args.append and os.path.exists(args.cdb):
-                with open(args.cdb) as handle:
-                    previous = iter(json.load(handle))
+                try:
+                    previous = iter(json.load(fd))
+                except ValueError:
+                    previous = iter([])
             else:
                 previous = iter([])
             # filter out duplicate entries from both
@@ -112,10 +136,14 @@ def capture(args):
         commands = (parse_exec_trace(os.path.join(tmpdir, filename))
                     for filename in sorted(os.listdir(tmpdir)))
         # do post processing
-        entries = post_processing(itertools.chain.from_iterable(commands))
+        fd = lock_file(args.cdb)
+        fd.seek(0)
+        entries = post_processing(itertools.chain.from_iterable(commands), fd)
         # dump the compilation database
-        with open(args.cdb, 'w+') as handle:
-            json.dump(list(entries), handle, sort_keys=True, indent=4)
+        fd.seek(0)
+        fd.truncate()
+        json.dump(list(entries), fd, sort_keys=True, indent=4)
+        unlock_file(fd)
         return exit_code
 
 
