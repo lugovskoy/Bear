@@ -46,7 +46,7 @@ tested on FreeBSD, GNU/Linux and OS X.
 
 Ideally, you should build Bear in a separate build directory.
 
-    cmake $BEAR_SOURCE_DIR
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=<prefix> $BEAR_SOURCE_DIR
     make all
     make install # to install
     make check   # to run tests
