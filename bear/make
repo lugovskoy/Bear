@@ -16,5 +16,5 @@ fi
 if [ ${INSIDE_BEAR} = true ]; then
   make $@
 else
-  ${BEAR_DIR}/bear -a -o ${BEAR_DB_FIKE} make $@
+  ${BEAR_DIR}/bear -a -o ${BEAR_DB_FILE} make $@
 fi

@@ -128,7 +128,7 @@ def capture(args):
 
     with temporary_directory(prefix='bear-', dir=tempdir()) as tmpdir:
         # run the build command
-        environment = setup_environment(tmpdir, args.libear)
+        environment = setup_environment(tmpdir, args.libear, args.libearpaths)
         logging.info('run build in environment: %s', environment)
         exit_code = subprocess.call(args.build, env=environment)
         logging.info('build finished with exit code: %s', exit_code)
@@ -147,7 +147,7 @@ def capture(args):
         return exit_code
 
 
-def setup_environment(destination, ear_library_path):
+def setup_environment(destination, ear_library, ear_library_paths):
     """ Sets up the environment for the build command.
 
     It sets the required environment variables and execute the given command.
@@ -163,7 +163,8 @@ def setup_environment(destination, ear_library_path):
             'DYLD_FORCE_FLAT_NAMESPACE': '1'
         })
     else:
-        environment.update({'LD_PRELOAD': ear_library_path})
+        environment.update({'LD_PRELOAD': ear_library})
+        environment.update({'LD_LIBRARY_PATH': ear_library_paths})
 
     return environment
 
@@ -362,7 +363,13 @@ def create_parser():
         dest='libear',
         default="@DEFAULT_PRELOAD_FILE@",
         action='store',
-        help="""specify libear file location.""")
+        help="""specify libear file location for use in LD_PRELOAD""")
+    testing.add_argument(
+        '--libearpaths', '-lp',
+        dest='libearpaths',
+        default="@DEFAULT_PRELOAD_PATHS@",
+        action='store',
+        help="""specify libear paths location for use in LD_LIBRARY_PATH""")
 
     parser.add_argument(
         dest='build',
