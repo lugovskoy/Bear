@@ -141,7 +141,7 @@ def capture(args):
         # dump the compilation database
         fd.seek(0)
         fd.truncate()
-        json.dump(list(entries), fd, sort_keys=True, indent=4)
+        json.dump(list(entries), fd)
         unlock_file(fd)
         return exit_code
 
