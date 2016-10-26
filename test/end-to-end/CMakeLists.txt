@@ -28,7 +28,7 @@ if(PYTHONINTERP_FOUND)
     COMMAND test `python ${CMAKE_CURRENT_SOURCE_DIR}/validate_and_count.py < shell.json` -eq 4
     COMMENT "Running module tests with shell")
 
-  add_dependencies(run_shell_test ear)
+  add_dependencies(run_shell_test ear64)
 
   add_test(NAME run_shell_test
     COMMAND make run_shell_test)
@@ -41,7 +41,7 @@ if(PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2 AND SCONS_FOUND)
     COMMAND test `python ${CMAKE_CURRENT_SOURCE_DIR}/validate_and_count.py < scons.json` -eq 4
     COMMENT "Running module tests with scons")
 
-  add_dependencies(run_scons_test ear)
+  add_dependencies(run_scons_test ear64)
 
   add_test(NAME run_scons_test
     COMMAND make run_scons_test)
@@ -55,7 +55,7 @@ if(PYTHONINTERP_FOUND AND QMAKE_FOUND)
     COMMAND test `python ${CMAKE_CURRENT_SOURCE_DIR}/validate_and_count.py < qmake.json` -eq 4
     COMMENT "Running module tests with qmake")
 
-  add_dependencies(run_qmake_test ear)
+  add_dependencies(run_qmake_test ear64)
 
   add_test(NAME run_qmake_test
     COMMAND make run_qmake_test)
